@@ -48,13 +48,14 @@ class WithInclusiveCache(
   nWays: Int = 8,
   capacityKB: Int = 512,
   outerLatencyCycles: Int = 40,
-  subBankingFactor: Int = 4
+  subBankingFactor: Int = 4,
+  writeBytes: Int = 0
 ) extends Config((site, here, up) => {
   case InclusiveCacheKey => InclusiveCacheParams(
       sets = (capacityKB * 1024)/(site(CacheBlockBytes) * nWays * nBanks),
       ways = nWays,
       memCycles = outerLatencyCycles,
-      writeBytes = site(XLen)/8,
+      writeBytes = if (writeBytes == 0) site(XLen)/8 else writeBytes,
       portFactor = subBankingFactor)
   case BankedL2Key => up(BankedL2Key, site).copy(nBanks = nBanks, coherenceManager = { context =>
     implicit val p = context.p
